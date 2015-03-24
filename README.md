@@ -2,6 +2,9 @@
 
 Permet d’afficher la météo depuis une station Netatmo sur un Kindle.
 
+Le résultat d’un jour de pluie est visible ici :
+https://raw.githubusercontent.com/iero/Kindle-weather-station/master/README.JPG
+
 Basé sur le travail de Matthew Petroff (http://mpetroff.net/2012/09/kindle-weather-display/) mais adapté et francisé.
 
 Utilise :
