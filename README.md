@@ -9,6 +9,7 @@ Utilise :
 - Pngcrush - http://pmt.sourceforge.net/pngcrush/
 - Request python library - http://docs.python-requests.org/en/latest/
 - Modified netatmo python api - https://github.com/philippelt/netatmo-api-python
+- Les icones de Noah Blon - http://codepen.io/noahblon/details/lxukH
 
 Vous avez donc besoin d’une API Netatmo et d’une API foecast.io
 
