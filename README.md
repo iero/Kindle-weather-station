@@ -18,9 +18,11 @@ Vous avez donc besoin d’une API Netatmo et d’une API foecast.io
 
 Sur le raspberry (ou equivalent) :
 - créer un répertoire kindle
-- Compiler pngcrush - http://pmt.sourceforge.net/pngcrush/
+- Compiler pngcrush (un binaire est gracieusement fourni)
 - Copier les scripts du répertoire raspberry
 - Modifier settings.xml
+- Ajouter dans le cron la ligne :
+*/5 * * * * /home/pi/kindle/weather-script.sh
 
 Sur le Kindle (de mémoire, j’ai oublié le pass root)
 
