@@ -17,25 +17,27 @@ Utilise :
 Vous avez donc besoin d’une API Netatmo et d’une API foecast.io
 
 Sur le raspberry (ou equivalent) :
+- installer un serveur web (cf google)
 - créer un répertoire kindle
 - Compiler pngcrush (un binaire est gracieusement fourni)
 - Copier les scripts du répertoire raspberry
 - Modifier settings.xml
-- Ajouter dans le cron la ligne :
+- Modifier la derniere ligne de weather-script.sh pour copier le fichier sur le serveur web. 
+- Ajouter dans le cron (crontab -e) la ligne :
 */5 * * * * /home/pi/kindle/weather-script.sh
 
-Sur le Kindle (de mémoire, j’ai oublié le pass root)
+Sur le Kindle :
 
 - Jailbreaker le Kindle. Pour le Kindle 4, j’ai utilisé cette page : http://wiki.mobileread.com/wiki/Kindle4NTHacking
 - Installer USBNetwork pour activer le ssh http://www.mobileread.com/forums/showthread.php?t=88004
 - Installer Kual et activer le ssh via wifi http://www.mobileread.com/forums/showthread.php?t=203326
 
 - Modifier kindle/display-weather pour mettre l’addresse du raspberry
-- Mettre les fichiers du répertoire kindle sur le Kindle
+- Mettre les fichiers du répertoire kindle dans /mnt/us/weather/
 - Lancer le cron toutes les 5 minutes (décallées de 2 minutes) pour mettre à jour la page
 
 kindle# /mnt/us/kindle/init-weather.sh
 kindle# mntroot rw
-kindle# echo « */5+2 * * * * /mnt/us/kindle/display-weather.sh >> /etc/crontab/root
+kindle# echo « */5+2 * * * * /mnt/us/weather/display-weather.sh » >> /etc/crontab/root
 kindle# mntroot ro
 kindle# /etc/init.d/cron restart
