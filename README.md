@@ -9,8 +9,7 @@ Le principe est le suivant :
   - Puis, ce fichier est mis a disposition sur un serveur "web"
   - De son coté, le Kindle efface son écran avec "eips", récupère (avec wget) et affiche le png.
 
-Le résultat d’un jour de pluie est visible ici :
-https://raw.githubusercontent.com/iero/Kindle-weather-station/master/README.JPG
+![Kindle weather station](https://raw.githubusercontent.com/iero/Kindle-weather-station/master/README.JPG) 
 
 Ce processus est basé sur super travail de Matthew Petroff (http://mpetroff.net/2012/09/kindle-weather-display/) avec un affichage adapté aux données Netatmo et des unitées SI.
 
