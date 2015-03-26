@@ -36,7 +36,7 @@ Voici la procédure sur le raspberry (ou equivalent) :
 - Modifier settings.xml pour mettre vos cpodes
 - Modifier la derniere ligne de weather-script.sh pour copier le fichier sur le serveur web. 
 - Ajouter dans le cron (crontab -e) la ligne :
-*/5 * * * * /home/pi/kindle/weather-script.sh
+    */5 * * * * /home/pi/kindle/weather-script.sh
 
 Puis sur le Kindle :
 
@@ -48,10 +48,10 @@ Puis sur le Kindle :
 - Mettre les fichiers du répertoire kindle dans /mnt/us/weather/
 - Lancer le cron toutes les 5 minutes (décallées de 2 minutes) pour mettre à jour la page en entrant les commandes suivantes :
 
-- kindle# /mnt/us/kindle/init-weather.sh
-- kindle# mntroot rw
-- kindle# echo "*/5+2 * * * * /mnt/us/weather/display-weather.sh" >> /etc/crontab/root
-- kindle# mntroot ro
-- kindle# /etc/init.d/cron restart
+    kindle# /mnt/us/kindle/init-weather.sh
+    kindle# mntroot rw
+    kindle# echo "*/5+2 * * * * /mnt/us/weather/display-weather.sh" >> /etc/crontab/root
+    kindle# mntroot ro
+    kindle# /etc/init.d/cron restart
   
 Pour faire la même chose sur un Kobo, Kevin explique la procédure ici : http://www.mobileread.com/forums/showthread.php?t=194376
