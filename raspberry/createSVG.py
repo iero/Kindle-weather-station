@@ -21,8 +21,8 @@ import forecastio
 import geticon
 import xml.etree.ElementTree as ET
 
-params_file = "settings.xml"
-filename = "kindleStation.svg"
+params_file="settings.xml"
+filename = "ieroStation.svg"
 
 # Create 
 
@@ -57,6 +57,7 @@ svg_file = open(filename,"w")
 svg_file.write('<?xml version="1.0" encoding="iso-8859-1"?>\n')
 svg_file.write('<svg xmlns="http://www.w3.org/2000/svg" height="800" width="600" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink">\n')
 svg_file.write('<g font-family="Chalkboard">\n')
+#svg_file.write('<g>\n')
 
 # Parsing values
 
@@ -87,10 +88,16 @@ for module, moduleData in devList.lastData(exclude=3600).items() :
 				svg_file.write("%i hPa" % (round(value)))
 				svg_file.write('</text>\n')
 			elif sensor == 'CO2' :
-				svg_file.write('<text style="text-anchor:end;" font-size="28px" x="520" y="655">')
-				svg_file.write("%i ppm CO" % (round(value)))
+				svg_file.write('<text style="text-anchor:end;" font-size="40px" x="450" y="655">')
+				svg_file.write("%i" % (round(value)))
 				svg_file.write('</text>\n')
-				svg_file.write('<text style="text-anchor:end;" font-size="20px" x="530" y="665">')
+				svg_file.write('<text style="text-anchor:start;" font-size="28px" x="458" y="644">')
+				svg_file.write("ppm")
+				svg_file.write('</text>\n')
+				svg_file.write('<text style="text-anchor:start;" font-size="28px" x="482" y="667">')
+				svg_file.write("CO")
+				svg_file.write('</text>\n')
+				svg_file.write('<text style="text-anchor:start;" font-size="20px" x="522" y="675">')
 				svg_file.write("2")
 				svg_file.write('</text>\n')
 	elif module == outdoor :
@@ -117,19 +124,37 @@ for module, moduleData in devList.lastData(exclude=3600).items() :
 			elif sensor == 'sum_rain_1' :
 				rain1 = value
 
-# Add forecast.io values
-svg_file.write('<text style="text-anchor:end;" font-size="35px" x="525" y="120">')
-svg_file.write("%i" % (math.ceil(by_day.data[0].temperatureMax)))
-svg_file.write('</text>\n')
-svg_file.write('<circle cx="535" cy="98" r="4" stroke="black" stroke-width="3" fill="none"/>')
-svg_file.write('<text style="text-anchor:start;" font-size="25px" x="540" y="110">C</text>')
-svg_file.write('<line x1="500" x2="560" y1="130" y2="130" style="fill:none;stroke:black;stroke-width:2px;"/>')
-svg_file.write('<text style="text-anchor:end;" font-size="35px" x="525" y="160">')
-svg_file.write("%i" % (math.floor(by_day.data[0].temperatureMin)))
-svg_file.write('</text>\n')
-svg_file.write('<circle cx="535" cy="140" r="4" stroke="black" stroke-width="3" fill="none"/>')
-svg_file.write('<text style="text-anchor:start;" font-size="25px" x="540" y="152">C</text>')
+# Add forecast.io min/max values
 
+
+timestamp = int(time.time())
+timeToTempMax = by_day.data[0].temperatureMaxTime - timestamp 
+if timeToTempMax > 0 :
+	svg_file.write('<text style="text-anchor:end;" font-size="35px" x="560" y="120">')
+	svg_file.write("%i" % (math.ceil(by_day.data[0].temperatureMax)))
+	svg_file.write('</text>\n')
+	svg_file.write('<circle cx="565" cy="98" r="4" stroke="black" stroke-width="3" fill="none"/>')
+	svg_file.write('<text style="text-anchor:start;" font-size="25px" x="570" y="110">C</text>')
+else :
+	svg_file.write('<text style="text-anchor:end;" font-size="35px" x="560" y="160">')
+	svg_file.write("%i" % (math.floor(by_day.data[1].temperatureMin)))
+	svg_file.write('</text>\n')
+	svg_file.write('<circle cx="565" cy="140" r="4" stroke="black" stroke-width="3" fill="none"/>')
+	svg_file.write('<text style="text-anchor:start;" font-size="25px" x="570" y="152">C</text>')
+
+print("%i" % (timeToTempMax))
+
+#svg_file.write('<text style="text-anchor:end;" font-size="35px" x="525" y="120">')
+#svg_file.write("%i" % (math.ceil(by_day.data[0].temperatureMax)))
+#svg_file.write('</text>\n')
+#svg_file.write('<circle cx="535" cy="98" r="4" stroke="black" stroke-width="3" fill="none"/>')
+#svg_file.write('<text style="text-anchor:start;" font-size="25px" x="540" y="110">C</text>')
+#svg_file.write('<line x1="500" x2="560" y1="130" y2="130" style="fill:none;stroke:black;stroke-width:2px;"/>')
+#svg_file.write('<text style="text-anchor:end;" font-size="35px" x="525" y="160">')
+#svg_file.write("%i" % (math.floor(by_day.data[0].temperatureMin)))
+#svg_file.write('</text>\n')
+#svg_file.write('<circle cx="535" cy="140" r="4" stroke="black" stroke-width="3" fill="none"/>')
+#svg_file.write('<text style="text-anchor:start;" font-size="25px" x="540" y="152">C</text>')
 
 # Forecast.io forecast
 locale.setlocale(locale.LC_ALL, 'fr_FR')
@@ -142,7 +167,10 @@ for i in range(2,4) :
 
 pasTemp = (530-370)/(maxTemp-minTemp)
 
-n=310
+minPlace=360
+maxPlace=560
+
+n=305
 for i in range(1,4) :
 	jour = datetime.date.today() + datetime.timedelta(days=i) 
 	svg_file.write('<text style="text-anchor:end;" font-size="35px" x="175" y="')
@@ -151,7 +179,7 @@ for i in range(1,4) :
 	svg_file.write(jour.strftime("%A"))
 	svg_file.write('</text>\n')
 	
-	tMin = (int)(370 + pasTemp*(by_day.data[i].temperatureMin-minTemp))
+	tMin = (int)(355 + pasTemp*(by_day.data[i].temperatureMin-minTemp))
 	svg_file.write('<text style="text-anchor:end;" font-size="35px" x="')
 	svg_file.write("%i" % (tMin))
 	svg_file.write('" y="')
@@ -258,10 +286,10 @@ if rain24 == 0 :
 else :
 	rain24Entier=math.floor(rain24)
 	rain24Decimale=10*(rain24 - rain24Entier)
-	svg_file.write('<text style="text-anchor:end;" font-size="40px" x="132" y="730">')
+	svg_file.write('<text style="text-anchor:end;" font-size="40px" x="128" y="720">')
 	svg_file.write("%i" % (rain24Entier))
 	svg_file.write('</text>')
-	svg_file.write('<text style="text-anchor:start;" font-size="30px" x="132" y="730">,')
+	svg_file.write('<text style="text-anchor:start;" font-size="30px" x="128" y="720">,')
 	svg_file.write("%i" % (rain24Decimale))
 	svg_file.write('</text>')
 	svg_file.write('<text style="text-anchor:start;" font-size="20px" x="78" y="756">')
