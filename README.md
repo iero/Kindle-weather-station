@@ -50,7 +50,7 @@ Puis sur le Kindle :
 - Lancer le cron toutes les 5 minutes pour mettre à jour la page en entrant les commandes suivantes :
 
 ```bash
-    kindle# /mnt/us/kindle/init-weather.sh
+    kindle# /mnt/us/weather/init-weather.sh
     kindle# mntroot rw
     kindle# echo "*/5 * * * * /mnt/us/weather/display-weather.sh" >> /etc/crontab/root
     kindle# mntroot ro
