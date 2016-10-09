@@ -3,7 +3,7 @@
 Permet d’afficher la météo depuis une station Netatmo sur un Kindle. 
 
 Le principe est le suivant :
-  - Un ordinateur (raspberry par exemple) récupère toutes les 5 minutes les données de la Netatmo pour la météo courante et de forecast.io pour les prévision. Un script en python (createSVG.py) fabrique un SVG au format kindle (600x800 px).
+  - Un ordinateur (raspberry par exemple) récupère toutes les 5 minutes les données de la Netatmo pour la météo courante et de darksky API pour les prévision. Un script en python (createSVG.py) fabrique un SVG au format kindle (600x800 px).
   - Toujours sur l'ordinateur, le svg est transformé en fichier png avec un fond blanc avec Imagemagick
   - Le fichier est ensuite compressé et optimisé pour le kindle avec Pngcrush.
   - Puis, ce fichier est mis a disposition sur un serveur "web"
@@ -15,7 +15,6 @@ Ce processus est basé sur super travail de Matthew Petroff (http://mpetroff.net
 
 Pour cela, on utilise :
 - Imagemagick - http://www.imagemagick.org/
-- Forecast.io python library - https://github.com/ZeevG/python-forecast.io
 - Pngcrush - http://pmt.sourceforge.net/pngcrush/
 - Request python library - http://docs.python-requests.org/en/latest/
 - Modified netatmo python api - https://github.com/philippelt/netatmo-api-python
@@ -23,7 +22,7 @@ Pour cela, on utilise :
 
 Vous avez donc besoin de vous authentifier au près de Netatmo et de foecast.io. Pour cela, il faut se connecter en temps que "dévelopeur". Pour notre usage de "particulier", c'est gratuit, et il faut se rendre ici :
   - Netatmo dev center : https://dev.netatmo.com/doc ('Create an app' en bas)
-  - Forecast.io API : https://developer.forecast.io/ ('Register' en haut).
+  - Daksky API : https://darksky.net/dev (‘Sign up’ en haut).
 
 Vous obtiendrez des codes (api key) que vous rentrez dans le fichier settings.xml
 
