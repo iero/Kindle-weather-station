@@ -3,7 +3,7 @@
 	<service name="station">
 		<city>My place</city>
 	</service>
-	<service name="forecast.io">
+	<service name="darksky">
 		<api_key>42e2xxxxxxxxxxxxxxxxx0962</api_key>
 		<lat>48.991</lat>
 		<lng>2.372</lng>

@@ -2,9 +2,10 @@
 # encoding=utf-8
 # -*- coding: utf-8 -*-
 
-# Published March 2015
 # Author : Greg Fabre - http://www.iero.org
 # Public domain source code
+# Published March 2015
+# Update October 2016
 
 # This code creates an SVG image, ready for Kindle 600x800 screen.
 # With weather information from Netatmo weather station and 
@@ -17,9 +18,11 @@ import time
 import datetime
 import locale
 import lnetatmo
-import forecastio
+import requests
 import geticon
 import xml.etree.ElementTree as ET
+
+locale.setlocale(locale.LC_TIME,'')
 
 params_file="settings.xml"
 filename = "ieroStation.svg"
@@ -32,18 +35,24 @@ root = tree.getroot()
 for service in root.findall('service'):
 	if service.get('name') == 'station' :
 		city=service.find('city').text
-	elif service.get('name') == 'forecast.io' :
+	elif service.get('name') == 'darksky' :
 		api_key=service.find('api_key').text
 		lat=service.find('lat').text
 		lng=service.find('lng').text
 		units=service.find('units').text
+	elif service.get('name') == 'wunderground' :
+		wu_api_key=service.find('api_key').text
+		wu_lat=service.find('lat').text
+		wu_lng=service.find('lng').text
 	elif service.get('name') == 'netatmo' :
 		indoor=service.find('indoor').text
 		outdoor=service.find('outdoor').text
 		pluvio=service.find('raingauge').text
 
-forecast = forecastio.load_forecast(api_key, lat, lng, time=None, units="si")
-by_day = forecast.daily()
+
+# Dark sky
+darkaddress = 'https://api.darksky.net/forecast/'+api_key+'/'+lat+','+lng+'?lang=fr&units=si&exclude=flags'
+darkdata = requests.get(darkaddress).json()
 
 # get netatmo data
 
@@ -68,6 +77,7 @@ svg_file.write(', le ')
 svg_file.write("%s" % (maintenant))
 svg_file.write('</text>\n')
 
+rain1 = 0
 rain24 = 0
 for module, moduleData in devList.lastData(exclude=3600).items() :
 	if module == indoor :
@@ -124,46 +134,27 @@ for module, moduleData in devList.lastData(exclude=3600).items() :
 			elif sensor == 'sum_rain_1' :
 				rain1 = value
 
-# Add forecast.io min/max values
+# Apparent Min/Max for today
 
+svg_file.write('<text style="text-anchor:end;" font-size="35px" x="560" y="120">')
+svg_file.write("%i" % (math.ceil(darkdata['daily']['data'][0]['apparentTemperatureMax'])))
+svg_file.write('</text>\n')
+svg_file.write('<circle cx="565" cy="98" r="4" stroke="black" stroke-width="3" fill="none"/>')
+svg_file.write('<text style="text-anchor:start;" font-size="25px" x="570" y="110">C</text>')
+svg_file.write('<text style="text-anchor:end;" font-size="35px" x="560" y="160">')
 
-timestamp = int(time.time())
-timeToTempMax = by_day.data[0].temperatureMaxTime - timestamp 
-if timeToTempMax > 0 :
-	svg_file.write('<text style="text-anchor:end;" font-size="35px" x="560" y="120">')
-	svg_file.write("%i" % (math.ceil(by_day.data[0].temperatureMax)))
-	svg_file.write('</text>\n')
-	svg_file.write('<circle cx="565" cy="98" r="4" stroke="black" stroke-width="3" fill="none"/>')
-	svg_file.write('<text style="text-anchor:start;" font-size="25px" x="570" y="110">C</text>')
-else :
-	svg_file.write('<text style="text-anchor:end;" font-size="35px" x="560" y="160">')
-	svg_file.write("%i" % (math.floor(by_day.data[1].temperatureMin)))
-	svg_file.write('</text>\n')
-	svg_file.write('<circle cx="565" cy="140" r="4" stroke="black" stroke-width="3" fill="none"/>')
-	svg_file.write('<text style="text-anchor:start;" font-size="25px" x="570" y="152">C</text>')
+svg_file.write("%i" % (math.floor(darkdata['daily']['data'][0]['apparentTemperatureMin'])))
+svg_file.write('</text>\n')
+svg_file.write('<circle cx="565" cy="140" r="4" stroke="black" stroke-width="3" fill="none"/>')
+svg_file.write('<text style="text-anchor:start;" font-size="25px" x="570" y="152">C</text>')
 
-print("%i" % (timeToTempMax))
+# Find min max for next days
 
-#svg_file.write('<text style="text-anchor:end;" font-size="35px" x="525" y="120">')
-#svg_file.write("%i" % (math.ceil(by_day.data[0].temperatureMax)))
-#svg_file.write('</text>\n')
-#svg_file.write('<circle cx="535" cy="98" r="4" stroke="black" stroke-width="3" fill="none"/>')
-#svg_file.write('<text style="text-anchor:start;" font-size="25px" x="540" y="110">C</text>')
-#svg_file.write('<line x1="500" x2="560" y1="130" y2="130" style="fill:none;stroke:black;stroke-width:2px;"/>')
-#svg_file.write('<text style="text-anchor:end;" font-size="35px" x="525" y="160">')
-#svg_file.write("%i" % (math.floor(by_day.data[0].temperatureMin)))
-#svg_file.write('</text>\n')
-#svg_file.write('<circle cx="535" cy="140" r="4" stroke="black" stroke-width="3" fill="none"/>')
-#svg_file.write('<text style="text-anchor:start;" font-size="25px" x="540" y="152">C</text>')
-
-# Forecast.io forecast
-locale.setlocale(locale.LC_ALL, 'fr_FR')
-
-minTemp=by_day.data[1].temperatureMin
-maxTemp=by_day.data[1].temperatureMax
+minTemp=darkdata['daily']['data'][1]['apparentTemperatureMin']
+maxTemp=darkdata['daily']['data'][1]['apparentTemperatureMax']
 for i in range(2,4) :
-	if by_day.data[i].temperatureMin < minTemp : minTemp = by_day.data[i].temperatureMin
-	if by_day.data[i].temperatureMax > maxTemp : maxTemp = by_day.data[i].temperatureMax
+	if darkdata['daily']['data'][i]['apparentTemperatureMin'] < minTemp : minTemp = darkdata['daily']['data'][i]['apparentTemperatureMin']
+	if darkdata['daily']['data'][i]['apparentTemperatureMax'] > maxTemp : maxTemp = darkdata['daily']['data'][i]['apparentTemperatureMax']
 
 pasTemp = (530-370)/(maxTemp-minTemp)
 
@@ -179,13 +170,13 @@ for i in range(1,4) :
 	svg_file.write(jour.strftime("%A"))
 	svg_file.write('</text>\n')
 	
-	tMin = (int)(355 + pasTemp*(by_day.data[i].temperatureMin-minTemp))
+	tMin = (int)(355 + pasTemp*(darkdata['daily']['data'][i]['apparentTemperatureMin']-minTemp))
 	svg_file.write('<text style="text-anchor:end;" font-size="35px" x="')
 	svg_file.write("%i" % (tMin))
 	svg_file.write('" y="')
 	svg_file.write("%i" % (n))
 	svg_file.write('">')
-	svg_file.write("%i" % (by_day.data[i].temperatureMin))
+	svg_file.write("%i" % (math.floor(darkdata['daily']['data'][i]['apparentTemperatureMin'])))
 	svg_file.write('</text>\n')
 	svg_file.write('<circle cx="')
 	svg_file.write("%i" % (tMin+5))
@@ -198,13 +189,13 @@ for i in range(1,4) :
 	svg_file.write("%i" % (n-10))
 	svg_file.write('">C</text>')
 
-	tMax = (int)(400 + pasTemp*(by_day.data[i].temperatureMax-minTemp))
+	tMax = (int)(400 + pasTemp*(darkdata['daily']['data'][i]['apparentTemperatureMax']-minTemp))
 	svg_file.write('<text style="text-anchor:end;" font-size="35px" x="')
 	svg_file.write("%i" % (tMax))
 	svg_file.write('" y="')
 	svg_file.write("%i" % (n))
 	svg_file.write('">')
-	svg_file.write("%i" % (by_day.data[i].temperatureMax))
+	svg_file.write("%i" % (math.ceil(darkdata['daily']['data'][i]['apparentTemperatureMax'])))
 	svg_file.write('</text>\n')
 	svg_file.write('<circle cx="')
 	svg_file.write("%i" % (tMax+5))
@@ -221,8 +212,8 @@ for i in range(1,4) :
 		svg_file.write("%i" % (tMin+50))
 		svg_file.write('" x2="')
 		space = tMax
-		if by_day.data[i].temperatureMax >= 10 : space -= 60 
-		elif by_day.data[i].temperatureMax >= 0 : space -= 40
+		if darkdata['daily']['data'][i]['apparentTemperatureMax'] >= 10 : space -= 60 
+		elif darkdata['daily']['data'][i]['apparentTemperatureMax'] >= 0 : space -= 40
 		svg_file.write("%i" % (space)) # prendre en compte longueur des chiffres
 		svg_file.write('" y1="')
 		svg_file.write("%i" % (n-10))
@@ -238,17 +229,18 @@ svg_file.write('</g>\n')
 svg_file.write(geticon.getHome())
 
 # add day icon
+icon = darkdata['daily']['data'][0]['icon']
 svg_file.write('<g transform="matrix(4,0,0,4,-35,-40)">')
-if forecast.hourly().data[0].icon == 'clear-day' : svg_file.write(geticon.getClearDay())
-elif forecast.hourly().data[0].icon == 'clear-night' : svg_file.write(geticon.getClearNight()) 
-elif forecast.hourly().data[0].icon == 'rain' : svg_file.write(geticon.getRain()) 
-elif forecast.hourly().data[0].icon == 'snow' : svg_file.write(geticon.getSnow()) 
-elif forecast.hourly().data[0].icon == 'sleet' : svg_file.write(geticon.getSleet()) 
-elif forecast.hourly().data[0].icon == 'wind' : svg_file.write(geticon.getWind()) 
-elif forecast.hourly().data[0].icon == 'fog' : svg_file.write(geticon.getFog()) 
-elif forecast.hourly().data[0].icon == 'cloudy' : svg_file.write(geticon.getCloudy()) 
-elif forecast.hourly().data[0].icon == 'partly-cloudy-day' : svg_file.write(geticon.getPartlyCloudyDay())
-elif forecast.hourly().data[0].icon == 'partly-cloudy-night' : svg_file.write(geticon.getPartlyCloudyNight())
+if icon == 'clear-day' : svg_file.write(geticon.getClearDay())
+elif icon == 'clear-night' : svg_file.write(geticon.getClearNight()) 
+elif icon == 'rain' : svg_file.write(geticon.getRain()) 
+elif icon == 'snow' : svg_file.write(geticon.getSnow()) 
+elif icon == 'sleet' : svg_file.write(geticon.getSleet()) 
+elif icon == 'wind' : svg_file.write(geticon.getWind()) 
+elif icon == 'fog' : svg_file.write(geticon.getFog()) 
+elif icon == 'cloudy' : svg_file.write(geticon.getCloudy()) 
+elif icon == 'partly-cloudy-day' : svg_file.write(geticon.getPartlyCloudyDay())
+elif icon == 'partly-cloudy-night' : svg_file.write(geticon.getPartlyCloudyNight())
 svg_file.write('</g>\n')
 
 # add next days icons
@@ -259,16 +251,17 @@ for i in range(1,4) :
 	svg_file.write("%i" % (n))
 	svg_file.write(')">')
 	
-	if by_day.data[i].icon == 'clear-day' : svg_file.write(geticon.getClearDay())
-	elif by_day.data[i].icon == 'clear-night' : svg_file.write(geticon.getClearDay()) 
-	elif by_day.data[i].icon == 'rain' : svg_file.write(geticon.getRain()) 
-	elif by_day.data[i].icon == 'snow' : svg_file.write(geticon.getSnow()) 
-	elif by_day.data[i].icon == 'sleet' : svg_file.write(geticon.getSleet()) 
-	elif by_day.data[i].icon == 'wind' : svg_file.write(geticon.getWind()) 
-	elif by_day.data[i].icon == 'fog' : svg_file.write(geticon.getFog()) 
-	elif by_day.data[i].icon == 'cloudy' : svg_file.write(geticon.getCloudy()) 
-	elif by_day.data[i].icon == 'partly-cloudy-day' : svg_file.write(geticon.getPartlyCloudyDay())
-	elif by_day.data[i].icon == 'partly-cloudy-night' : svg_file.write(geticon.getPartlyCloudyDay())
+	icon = darkdata['daily']['data'][i]['icon']
+	if icon == 'clear-day' : svg_file.write(geticon.getClearDay())
+	elif icon == 'clear-night' : svg_file.write(geticon.getClearDay()) 
+	elif icon == 'rain' : svg_file.write(geticon.getRain()) 
+	elif icon == 'snow' : svg_file.write(geticon.getSnow()) 
+	elif icon == 'sleet' : svg_file.write(geticon.getSleet()) 
+	elif icon == 'wind' : svg_file.write(geticon.getWind()) 
+	elif icon == 'fog' : svg_file.write(geticon.getFog()) 
+	elif icon == 'cloudy' : svg_file.write(geticon.getCloudy()) 
+	elif icon == 'partly-cloudy-day' : svg_file.write(geticon.getPartlyCloudyDay())
+	elif icon == 'partly-cloudy-night' : svg_file.write(geticon.getPartlyCloudyDay())
 	n += 90
 	svg_file.write('</g>\n')
 
